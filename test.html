@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Small Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background-color: #1e293b;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            width: 320px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #38bdf8;
+        }
+        p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+        .status-box {
+            background-color: #0f172a;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #334155;
+        }
+        .indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: #22c55e;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>Welcome Home</h1>
+        <p>My personal domain hub &amp; project dashboard.</p>
+        
+        <div class="status-box">
+            <span class="indicator"></span>
+            <strong>System Status:</strong> Online
+        </div>
+    </div>
+
+</body>
+</html>
