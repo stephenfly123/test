@@ -2,23 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Live Public Feed</title>
+    <title>Public Data Feed</title>
     <style>
         body { font-family: 'Courier New', monospace; background: #05050a; color: #f8fafc; padding: 20px; }
         .feed-container { max-width: 600px; margin: 0 auto; }
-        h1 { color: #22c55e; border-bottom: 1px solid #1e293b; padding-bottom: 10px; }
-        .post { background: #111827; border-left: 4px solid #22c55e; padding: 15px; margin-bottom: 15px; border-radius: 4px; }
-        .time { color: #94a3b8; font-size: 0.8rem; margin-bottom: 8px; font-weight: bold; }
-        .content { font-size: 1.1rem; line-height: 1.4; }
+        h1 { color: #22c55e; border-bottom: 1px dashed #1e293b; padding-bottom: 10px; margin-bottom: 30px; }
+        
+        .time-badge { color: #94a3b8; font-size: 0.8rem; margin-bottom: 8px; font-weight: bold; }
+        
+        /* Note Style */
+        .post-note { background: #111827; border-left: 4px solid #38bdf8; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+        .note-content { font-size: 1.1rem; line-height: 1.5; white-space: pre-wrap; }
+
+        /* Blog Style */
+        .post-blog { background: #111827; border-left: 4px solid #facc15; margin-bottom: 20px; border-radius: 4px; }
+        
+        /* The clickable title part */
+        summary { padding: 15px; cursor: pointer; font-size: 1.2rem; font-weight: bold; color: #facc15; list-style: none; outline: none; }
+        summary::-webkit-details-marker { display: none; } /* Hide default arrow */
+        summary:hover { background: #1e293b; }
+        
+        /* The hidden content part */
+        .blog-content { padding: 0 15px 15px 15px; font-size: 1.1rem; line-height: 1.6; color: #e2e8f0; border-top: 1px solid #1e293b; white-space: pre-wrap; margin-top: 10px; }
+        
     </style>
 </head>
 <body>
 
     <div class="feed-container">
-        <h1>LIVE OPERATIONS FEED</h1>
-        <div id="feed">
-            <!-- Posts will appear here automatically -->
-        </div>
+        <h1>NEXUS // LIVE TRANSMISSIONS</h1>
+        <div id="feed"></div>
     </div>
 
     <script>
@@ -27,32 +40,42 @@
             const posts = JSON.parse(localStorage.getItem('livePosts') || '[]');
             
             if (posts.length === 0) {
-                feed.innerHTML = "<p style='color: #94a3b8;'>Waiting for incoming transmissions...</p>";
+                feed.innerHTML = "<p style='color: #64748b;'>NO ACTIVE TRANSMISSIONS...</p>";
                 return;
             }
 
-            feed.innerHTML = ''; // Clear current feed
+            feed.innerHTML = ''; 
             
-            // Render all posts
             posts.forEach(post => {
-                const postDiv = document.createElement('div');
-                postDiv.className = 'post';
-                postDiv.innerHTML = `
-                    <div class="time">${post.time}</div>
-                    <div class="content">${post.text}</div>
-                `;
-                feed.appendChild(postDiv);
+                if (post.type === 'note') {
+                    // Render Note
+                    const noteDiv = document.createElement('div');
+                    noteDiv.className = 'post-note';
+                    noteDiv.innerHTML = `
+                        <div class="time-badge">${post.time}</div>
+                        <div class="note-content">${post.text}</div>
+                    `;
+                    feed.appendChild(noteDiv);
+                } 
+                else if (post.type === 'blog') {
+                    // Render Blog with expandable details tag
+                    const blogDetails = document.createElement('details');
+                    blogDetails.className = 'post-blog';
+                    blogDetails.innerHTML = `
+                        <summary>
+                            <div class="time-badge">${post.time}</div>
+                            [+] ${post.title}
+                        </summary>
+                        <div class="blog-content">${post.text}</div>
+                    `;
+                    feed.appendChild(blogDetails);
+                }
             });
         }
 
-        // Load posts immediately when page opens
         loadPosts();
-
-        // Magic trick: Listen for updates from the Admin page in real-time
         window.addEventListener('storage', function(e) {
-            if (e.key === 'livePosts') {
-                loadPosts();
-            }
+            if (e.key === 'livePosts') loadPosts();
         });
     </script>
 </body>
