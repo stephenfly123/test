@@ -2,50 +2,111 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Control Center</title>
+    <title>Admin // Command Center</title>
     <style>
-        body { font-family: 'Courier New', monospace; background: #0f172a; color: #38bdf8; padding: 20px; }
-        .box { background: #1e293b; padding: 20px; border-radius: 8px; max-width: 500px; margin: 0 auto; }
-        textarea { width: 100%; height: 100px; background: #0f172a; color: #fff; border: 1px solid #38bdf8; padding: 10px; margin-bottom: 10px; font-family: inherit; }
-        button { background: #38bdf8; color: #000; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        body { font-family: 'Courier New', monospace; background: #0f172a; color: #38bdf8; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .box { background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        input, select, textarea { width: 100%; box-sizing: border-box; background: #0f172a; color: #fff; border: 1px solid #38bdf8; padding: 10px; margin-bottom: 10px; font-family: inherit; }
+        button { background: #38bdf8; color: #000; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; width: 100%; }
         button:hover { background: #0ea5e9; }
-        #status { color: #22c55e; margin-top: 10px; font-size: 0.9rem; }
+        
+        .admin-post { background: #0f172a; border: 1px solid #334155; padding: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px;}
+        .delete-btn { background: #ef4444; color: white; width: auto; padding: 5px 10px; margin: 0; }
+        .delete-btn:hover { background: #dc2626; }
     </style>
 </head>
 <body>
 
     <div class="box">
-        <h2>TRANSMIT LIVE UPDATE</h2>
-        <textarea id="post-text" placeholder="Type your live update here..."></textarea>
-        <br>
-        <button onclick="publishPost()">BROADCAST TO PUBLIC WEB</button>
-        <div id="status"></div>
+        <h2>TRANSMIT UPDATE</h2>
+        
+        <select id="post-type" onchange="toggleMode()">
+            <option value="note">Short Note (Direct display)</option>
+            <option value="blog">Full Blog (Click title to read)</option>
+        </select>
+
+        <input type="text" id="post-title" placeholder="Blog Title..." style="display: none;">
+        <textarea id="post-text" placeholder="Type your update or blog content here..." style="height: 120px;"></textarea>
+        
+        <button onclick="publishPost()">BROADCAST TO PUBLIC</button>
+    </div>
+
+    <div class="box">
+        <h2>MANAGE POSTS</h2>
+        <div id="admin-feed"></div>
     </div>
 
     <script>
-        function publishPost() {
-            const text = document.getElementById('post-text').value;
-            if (!text) return;
+        // Show/hide title input based on type
+        function toggleMode() {
+            const type = document.getElementById('post-type').value;
+            document.getElementById('post-title').style.display = (type === 'blog') ? 'block' : 'none';
+        }
 
-            // Get existing posts or create empty array
+        function publishPost() {
+            const type = document.getElementById('post-type').value;
+            const title = document.getElementById('post-title').value;
+            const text = document.getElementById('post-text').value;
+            
+            if (!text || (type === 'blog' && !title)) {
+                alert("Please fill in all required fields!");
+                return;
+            }
+
             let posts = JSON.parse(localStorage.getItem('livePosts') || '[]');
             
-            // Add new post with timestamp
             const now = new Date();
-            const timeString = String(now.getUTCHours()).padStart(2, '0') + ':' + 
-                               String(now.getUTCMinutes()).padStart(2, '0') + ' ZULU';
+            const timeString = String(now.getUTCHours()).padStart(2, '0') + ':' + String(now.getUTCMinutes()).padStart(2, '0') + ' Z';
             
-            posts.unshift({ text: text, time: timeString }); // unshift puts it at the top
+            // Create the post object with a unique ID
+            const newPost = {
+                id: Date.now(), // Unique ID based on exact millisecond
+                type: type,
+                title: title,
+                text: text,
+                time: timeString
+            };
             
-            // Save back to local storage
+            posts.unshift(newPost);
             localStorage.setItem('livePosts', JSON.stringify(posts));
             
-            // Clear box and show status
+            // Reset inputs
+            document.getElementById('post-title').value = '';
             document.getElementById('post-text').value = '';
-            document.getElementById('status').innerText = "STATUS: UPDATE BROADCASTED SUCCESSFULLY";
             
-            setTimeout(() => { document.getElementById('status').innerText = ""; }, 3000);
+            renderAdminFeed();
         }
+
+        function deletePost(id) {
+            let posts = JSON.parse(localStorage.getItem('livePosts') || '[]');
+            // Filter out the post with the matching ID
+            posts = posts.filter(post => post.id !== id);
+            localStorage.setItem('livePosts', JSON.stringify(posts));
+            renderAdminFeed();
+        }
+
+        function renderAdminFeed() {
+            const feed = document.getElementById('admin-feed');
+            const posts = JSON.parse(localStorage.getItem('livePosts') || '[]');
+            feed.innerHTML = '';
+
+            posts.forEach(post => {
+                const div = document.createElement('div');
+                div.className = 'admin-post';
+                const displayName = post.type === 'blog' ? `BLOG: ${post.title}` : `NOTE: ${post.text.substring(0, 20)}...`;
+                
+                div.innerHTML = `
+                    <span style="color: #94a3b8; font-size: 0.9rem;">${displayName}</span>
+                    <button class="delete-btn" onclick="deletePost(${post.id})">DELETE</button>
+                `;
+                feed.appendChild(div);
+            });
+        }
+
+        // Run on load
+        renderAdminFeed();
+        // Update admin list if changed in another tab
+        window.addEventListener('storage', (e) => { if (e.key === 'livePosts') renderAdminFeed(); });
     </script>
 </body>
 </html>
