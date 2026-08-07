@@ -11,14 +11,23 @@
         .header-container { 
             display: flex; 
             justify-content: space-between; 
-            align-items: center; 
+            align-items: flex-start; /* Aligns items to the top */
             border-bottom: 1px dashed #1e293b; 
             padding-bottom: 15px; 
             margin-bottom: 30px; 
         }
         
-        h1 { color: #22c55e; margin: 0; font-size: 1.5rem; }
+        h1 { color: #22c55e; margin: 0; font-size: 1.5rem; line-height: 1.2; }
         
+        /* Contact Section Group */
+        .contact-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end; /* Aligns everything to the right */
+            text-align: right;
+            max-width: 220px;
+        }
+
         /* Contact Button Style */
         .contact-btn { 
             background: transparent; 
@@ -30,10 +39,31 @@
             border-radius: 4px; 
             font-size: 0.85rem;
             transition: all 0.2s;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
         }
         .contact-btn:hover { 
             background: rgba(56, 189, 248, 0.15); 
             box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+        
+        /* Text below the button */
+        .contact-subtext {
+            color: #94a3b8;
+            font-size: 0.75rem;
+            margin-top: 6px;
+            line-height: 1.3;
+        }
+
+        /* Copied Alert */
+        .copied-alert {
+            color: #22c55e;
+            font-size: 0.7rem;
+            margin-top: 4px;
+            display: none;
+            font-weight: bold;
         }
         
         .time-badge { color: #94a3b8; font-size: 0.8rem; margin-bottom: 8px; font-weight: bold; }
@@ -60,16 +90,30 @@
         <div class="header-container">
             <h1>NEXUS // LIVE TRANSMISSIONS</h1>
             
-            <!-- Mailto link pre-fills the TO, SUBJECT, and BODY fields -->
-            <a href="mailto:stephen@stephencloud.online?subject=Topic%20Request%20for%20Stephen&body=Hi%20Stephen,%0A%0AI%20would%20like%20you%20to%20write%20a%20post%20about:%0A" class="contact-btn">
-                ✉ REQUEST TOPIC
-            </a>
+            <div class="contact-group">
+                <!-- Mailto link + JavaScript copy fallback -->
+                <a href="mailto:stephen@stephencloud.online?subject=Topic%20Request&body=Hi%20Stephen,%0A%0AHere%20is%20what%20I%20want%20you%20to%20write%20about:%0A" 
+                   class="contact-btn" 
+                   onclick="copyEmailToClipboard(event)">
+                    ✉ CONTACT ME
+                </a>
+                <div class="contact-subtext">Tell me what's on your mind or what you want me to write about</div>
+                <div class="copied-alert" id="copied-alert">Email copied to clipboard!</div>
+            </div>
         </div>
 
         <div id="feed"></div>
     </div>
 
     <script>
+        // Fallback: If mailto doesn't work, this copies the email address instantly
+        function copyEmailToClipboard(event) {
+            navigator.clipboard.writeText("stephen@stephencloud.online");
+            const alertBox = document.getElementById('copied-alert');
+            alertBox.style.display = 'block';
+            setTimeout(() => { alertBox.style.display = 'none'; }, 3000);
+        }
+
         function loadPosts() {
             const feed = document.getElementById('feed');
             const posts = JSON.parse(localStorage.getItem('livePosts') || '[]');
