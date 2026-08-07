@@ -6,7 +6,35 @@
     <style>
         body { font-family: 'Courier New', monospace; background: #05050a; color: #f8fafc; padding: 20px; }
         .feed-container { max-width: 600px; margin: 0 auto; }
-        h1 { color: #22c55e; border-bottom: 1px dashed #1e293b; padding-bottom: 10px; margin-bottom: 30px; }
+        
+        /* Header Layout */
+        .header-container { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px dashed #1e293b; 
+            padding-bottom: 15px; 
+            margin-bottom: 30px; 
+        }
+        
+        h1 { color: #22c55e; margin: 0; font-size: 1.5rem; }
+        
+        /* Contact Button Style */
+        .contact-btn { 
+            background: transparent; 
+            border: 1px solid #38bdf8; 
+            color: #38bdf8; 
+            padding: 8px 15px; 
+            text-decoration: none; 
+            font-weight: bold; 
+            border-radius: 4px; 
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .contact-btn:hover { 
+            background: rgba(56, 189, 248, 0.15); 
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
         
         .time-badge { color: #94a3b8; font-size: 0.8rem; margin-bottom: 8px; font-weight: bold; }
         
@@ -17,12 +45,10 @@
         /* Blog Style */
         .post-blog { background: #111827; border-left: 4px solid #facc15; margin-bottom: 20px; border-radius: 4px; }
         
-        /* The clickable title part */
         summary { padding: 15px; cursor: pointer; font-size: 1.2rem; font-weight: bold; color: #facc15; list-style: none; outline: none; }
-        summary::-webkit-details-marker { display: none; } /* Hide default arrow */
+        summary::-webkit-details-marker { display: none; }
         summary:hover { background: #1e293b; }
         
-        /* The hidden content part */
         .blog-content { padding: 0 15px 15px 15px; font-size: 1.1rem; line-height: 1.6; color: #e2e8f0; border-top: 1px solid #1e293b; white-space: pre-wrap; margin-top: 10px; }
         
     </style>
@@ -30,7 +56,16 @@
 <body>
 
     <div class="feed-container">
-        <h1>NEXUS // LIVE TRANSMISSIONS</h1>
+        
+        <div class="header-container">
+            <h1>NEXUS // LIVE TRANSMISSIONS</h1>
+            
+            <!-- Mailto link pre-fills the TO, SUBJECT, and BODY fields -->
+            <a href="mailto:stephen@stephencloud.online?subject=Topic%20Request%20for%20Stephen&body=Hi%20Stephen,%0A%0AI%20would%20like%20you%20to%20write%20a%20post%20about:%0A" class="contact-btn">
+                ✉ REQUEST TOPIC
+            </a>
+        </div>
+
         <div id="feed"></div>
     </div>
 
@@ -48,7 +83,6 @@
             
             posts.forEach(post => {
                 if (post.type === 'note') {
-                    // Render Note
                     const noteDiv = document.createElement('div');
                     noteDiv.className = 'post-note';
                     noteDiv.innerHTML = `
@@ -58,7 +92,6 @@
                     feed.appendChild(noteDiv);
                 } 
                 else if (post.type === 'blog') {
-                    // Render Blog with expandable details tag
                     const blogDetails = document.createElement('details');
                     blogDetails.className = 'post-blog';
                     blogDetails.innerHTML = `
