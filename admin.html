@@ -2,111 +2,131 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin // Command Center</title>
+    <title>Admin // Cloud Command</title>
     <style>
         body { font-family: 'Courier New', monospace; background: #0f172a; color: #38bdf8; padding: 20px; max-width: 600px; margin: 0 auto; }
         .box { background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
         input, select, textarea { width: 100%; box-sizing: border-box; background: #0f172a; color: #fff; border: 1px solid #38bdf8; padding: 10px; margin-bottom: 10px; font-family: inherit; }
         button { background: #38bdf8; color: #000; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; width: 100%; }
         button:hover { background: #0ea5e9; }
-        
         .admin-post { background: #0f172a; border: 1px solid #334155; padding: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px;}
         .delete-btn { background: #ef4444; color: white; width: auto; padding: 5px 10px; margin: 0; }
-        .delete-btn:hover { background: #dc2626; }
+        #status { color: #22c55e; margin-top: 10px; font-size: 0.9rem; text-align: center; }
     </style>
 </head>
 <body>
 
     <div class="box">
-        <h2>TRANSMIT UPDATE</h2>
-        
+        <h2>CLOUD TRANSMISSION</h2>
         <select id="post-type" onchange="toggleMode()">
-            <option value="note">Short Note (Direct display)</option>
-            <option value="blog">Full Blog (Click title to read)</option>
+            <option value="note">Short Note</option>
+            <option value="blog">Full Blog</option>
         </select>
-
         <input type="text" id="post-title" placeholder="Blog Title..." style="display: none;">
-        <textarea id="post-text" placeholder="Type your update or blog content here..." style="height: 120px;"></textarea>
-        
-        <button onclick="publishPost()">BROADCAST TO PUBLIC</button>
+        <textarea id="post-text" placeholder="Type your update here..." style="height: 120px;"></textarea>
+        <button id="send-btn" onclick="publishPost()">BROADCAST TO WORLD</button>
+        <div id="status"></div>
     </div>
 
     <div class="box">
-        <h2>MANAGE POSTS</h2>
-        <div id="admin-feed"></div>
+        <h2>MANAGE CLOUD POSTS</h2>
+        <button onclick="renderAdminFeed()" style="margin-bottom: 15px; background: #1e293b; color: #38bdf8; border: 1px solid #38bdf8;">REFRESH LIST</button>
+        <div id="admin-feed">LOADING FROM CLOUD...</div>
     </div>
 
     <script>
-        // Show/hide title input based on type
+        // Your specific Google Sheets API link
+        const API_URL = 'https://sheetdb.io/api/v1/cauz9ltpdtgy6'; 
+
         function toggleMode() {
             const type = document.getElementById('post-type').value;
             document.getElementById('post-title').style.display = (type === 'blog') ? 'block' : 'none';
         }
 
-        function publishPost() {
+        async function publishPost() {
             const type = document.getElementById('post-type').value;
             const title = document.getElementById('post-title').value;
             const text = document.getElementById('post-text').value;
             
-            if (!text || (type === 'blog' && !title)) {
-                alert("Please fill in all required fields!");
-                return;
-            }
+            if (!text || (type === 'blog' && !title)) return alert("Fill all fields!");
 
-            let posts = JSON.parse(localStorage.getItem('livePosts') || '[]');
+            const btn = document.getElementById('send-btn');
+            const status = document.getElementById('status');
+            btn.innerText = "SENDING TO CLOUD...";
             
             const now = new Date();
             const timeString = String(now.getUTCHours()).padStart(2, '0') + ':' + String(now.getUTCMinutes()).padStart(2, '0') + ' Z';
             
-            // Create the post object with a unique ID
             const newPost = {
-                id: Date.now(), // Unique ID based on exact millisecond
+                id: Date.now().toString(),
                 type: type,
                 title: title,
                 text: text,
                 time: timeString
             };
+
+            // Send to Google Sheets via SheetDB
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: [newPost] })
+                });
+
+                status.innerText = "SUCCESS! POST SAVED TO CLOUD.";
+                document.getElementById('post-title').value = '';
+                document.getElementById('post-text').value = '';
+                renderAdminFeed();
+            } catch (err) {
+                status.innerText = "ERROR SAVING TO CLOUD.";
+            }
             
-            posts.unshift(newPost);
-            localStorage.setItem('livePosts', JSON.stringify(posts));
-            
-            // Reset inputs
-            document.getElementById('post-title').value = '';
-            document.getElementById('post-text').value = '';
-            
-            renderAdminFeed();
+            btn.innerText = "BROADCAST TO WORLD";
+            setTimeout(() => status.innerText = "", 3000);
         }
 
-        function deletePost(id) {
-            let posts = JSON.parse(localStorage.getItem('livePosts') || '[]');
-            // Filter out the post with the matching ID
-            posts = posts.filter(post => post.id !== id);
-            localStorage.setItem('livePosts', JSON.stringify(posts));
-            renderAdminFeed();
+        async function deletePost(id) {
+            const status = document.getElementById('status');
+            status.innerText = "DELETING FROM CLOUD...";
+            
+            try {
+                // Delete from Google Sheets based on the ID column
+                await fetch(`${API_URL}/id/${id}`, { method: 'DELETE' });
+                status.innerText = "DELETED SUCCESSFULLY.";
+                renderAdminFeed();
+            } catch (err) {
+                status.innerText = "ERROR DELETING.";
+            }
+            setTimeout(() => status.innerText = "", 3000);
         }
 
-        function renderAdminFeed() {
+        async function renderAdminFeed() {
             const feed = document.getElementById('admin-feed');
-            const posts = JSON.parse(localStorage.getItem('livePosts') || '[]');
-            feed.innerHTML = '';
-
-            posts.forEach(post => {
-                const div = document.createElement('div');
-                div.className = 'admin-post';
-                const displayName = post.type === 'blog' ? `BLOG: ${post.title}` : `NOTE: ${post.text.substring(0, 20)}...`;
+            feed.innerHTML = "Fetching from cloud...";
+            
+            try {
+                const response = await fetch(API_URL);
+                let posts = await response.json();
+                posts.reverse(); // Show newest at the top
                 
-                div.innerHTML = `
-                    <span style="color: #94a3b8; font-size: 0.9rem;">${displayName}</span>
-                    <button class="delete-btn" onclick="deletePost(${post.id})">DELETE</button>
-                `;
-                feed.appendChild(div);
-            });
+                feed.innerHTML = '';
+                posts.forEach(post => {
+                    const div = document.createElement('div');
+                    div.className = 'admin-post';
+                    const displayName = post.type === 'blog' ? `BLOG: ${post.title}` : `NOTE: ${post.text.substring(0, 15)}...`;
+                    
+                    div.innerHTML = `
+                        <span style="color: #94a3b8; font-size: 0.9rem;">${displayName}</span>
+                        <button class="delete-btn" onclick="deletePost('${post.id}')">DELETE</button>
+                    `;
+                    feed.appendChild(div);
+                });
+            } catch(err) {
+                feed.innerHTML = "Failed to connect to database.";
+            }
         }
 
-        // Run on load
         renderAdminFeed();
-        // Update admin list if changed in another tab
-        window.addEventListener('storage', (e) => { if (e.key === 'livePosts') renderAdminFeed(); });
     </script>
 </body>
 </html>
