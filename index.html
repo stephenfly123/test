@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Public Cloud Feed</title>
     
     <!-- Google tag (gtag.js) -->
@@ -15,14 +16,14 @@
     </script>
     <!-- End Google tag -->
 
-    <!-- Google AdSense -->
+    <!-- Google AdSense Main Script -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5355424366172129"
          crossorigin="anonymous"></script>
     <!-- End Google AdSense -->
 
     <style>
-        body { font-family: 'Courier New', monospace; background: #05050a; color: #f8fafc; padding: 20px; }
-        .feed-container { max-width: 600px; margin: 0 auto; }
+        body { font-family: 'Courier New', monospace; background: #05050a; color: #f8fafc; padding: 20px; margin: 0; }
+        .feed-container { max-width: 600px; margin: 0 auto; padding-bottom: 80px; }
         .header-container { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px dashed #1e293b; padding-bottom: 15px; margin-bottom: 30px; }
         h1 { color: #22c55e; margin: 0; font-size: 1.5rem; line-height: 1.2; }
         
@@ -40,6 +41,26 @@
         summary::-webkit-details-marker { display: none; }
         summary:hover { background: #1e293b; }
         .blog-content { padding: 0 15px 15px 15px; font-size: 1.1rem; line-height: 1.6; color: #e2e8f0; border-top: 1px solid #1e293b; white-space: pre-wrap; margin-top: 10px; }
+
+        /* In-Feed Ad Card Styling */
+        .post-ad { background: #111827; border-left: 4px solid #64748b; padding: 15px; margin-bottom: 20px; border-radius: 4px; overflow: hidden; }
+
+        /* Footer & Privacy Link */
+        footer { border-top: 1px dashed #1e293b; margin-top: 40px; padding-top: 15px; text-align: center; font-size: 0.8rem; color: #64748b; }
+        footer a { color: #38bdf8; text-decoration: none; margin: 0 10px; cursor: pointer; }
+        footer a:hover { text-decoration: underline; }
+
+        /* Cookie Consent Banner */
+        #cookie-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; border-top: 2px solid #38bdf8; padding: 15px 20px; display: none; justify-content: space-between; align-items: center; gap: 15px; z-index: 1000; font-size: 0.85rem; box-shadow: 0 -4px 12px rgba(0,0,0,0.5); }
+        #cookie-banner p { margin: 0; color: #cbd5e1; }
+        .cookie-btn { background: #22c55e; color: #05050a; border: none; padding: 8px 16px; font-weight: bold; border-radius: 4px; cursor: pointer; font-family: inherit; flex-shrink: 0; }
+        .cookie-btn:hover { background: #16a34a; }
+
+        /* Privacy Policy Modal */
+        #privacy-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: #0f172a; border: 1px solid #38bdf8; max-width: 550px; width: 90%; max-height: 80vh; overflow-y: auto; padding: 20px; border-radius: 6px; font-size: 0.9rem; line-height: 1.5; color: #cbd5e1; }
+        .modal-content h2 { color: #22c55e; margin-top: 0; }
+        .close-modal { background: #ef4444; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-family: inherit; margin-top: 15px; float: right; }
     </style>
 </head>
 <body>
@@ -56,10 +77,51 @@
         <div id="feed">
             <p style="color: #64748b;">CONNECTING TO GOOGLE CLOUD DATABASE...</p>
         </div>
+
+        <footer>
+            <span>&copy; 2026 NEXUS Cloud Feed</span> | 
+            <a onclick="openPrivacyModal()">Privacy Policy & Terms</a>
+        </footer>
+    </div>
+
+    <!-- Cookie Consent Banner -->
+    <div id="cookie-banner">
+        <p>We use cookies and third-party vendor services (including Google AdSense) to deliver personalized content, serve advertisements, and analyze web traffic. By using this website, you consent to our privacy practices.</p>
+        <button class="cookie-btn" onclick="acceptCookies()">ACCEPT & CONTINUE</button>
+    </div>
+
+    <!-- Privacy Policy & Terms Modal -->
+    <div id="privacy-modal">
+        <div class="modal-content">
+            <h2>Privacy Policy & Terms of Service</h2>
+            <p><strong>1. Data Collection & Cookies:</strong> This website utilizes cookies and third-party advertising partners (such as Google AdSense) to measure audience engagement and customize ad content based on prior visits.</p>
+            <p><strong>2. Google AdSense Disclosures:</strong> Third-party vendors, including Google, use cookies to serve ads based on users' previous visits to this site or other web domains across the internet.</p>
+            <p><strong>3. User Privacy Options:</strong> Visitors can opt out of personalized advertising by managing their preferences at Google Ads Settings.</p>
+            <p><strong>4. Terms & Disclaimer:</strong> The content published on this feed is for general informational and educational purposes only. The site owner assumes no legal liability for content errors or third-party links.</p>
+            <button class="close-modal" onclick="closePrivacyModal()">Close</button>
+        </div>
     </div>
 
     <script>
-        // Your specific Google Sheets API link
+        // Manage Cookie Banner Display
+        if (!localStorage.getItem('cookieConsent')) {
+            document.getElementById('cookie-banner').style.display = 'flex';
+        }
+
+        function acceptCookies() {
+            localStorage.setItem('cookieConsent', 'true');
+            document.getElementById('cookie-banner').style.display = 'none';
+        }
+
+        function openPrivacyModal() {
+            document.getElementById('privacy-modal').style.display = 'flex';
+        }
+
+        function closePrivacyModal() {
+            document.getElementById('privacy-modal').style.display = 'none';
+        }
+
+        // SheetDB API integration
         const API_URL = 'https://sheetdb.io/api/v1/cauz9ltpdtgy6';
 
         async function loadPosts() {
@@ -75,9 +137,10 @@
                 }
 
                 feed.innerHTML = ''; 
-                posts.reverse(); // Put newest at the top
+                posts.reverse(); // Put newest entries at the top
                 
-                posts.forEach(post => {
+                posts.forEach((post, index) => {
+                    // Render Note Post
                     if (post.type === 'note') {
                         const noteDiv = document.createElement('div');
                         noteDiv.className = 'post-note';
@@ -87,6 +150,7 @@
                         `;
                         feed.appendChild(noteDiv);
                     } 
+                    // Render Blog Post
                     else if (post.type === 'blog') {
                         const blogDetails = document.createElement('details');
                         blogDetails.className = 'post-blog';
@@ -99,16 +163,37 @@
                         `;
                         feed.appendChild(blogDetails);
                     }
+
+                    // Insert AdSense unit after every 3 posts
+                    if ((index + 1) % 3 === 0) {
+                        const adContainer = document.createElement('div');
+                        adContainer.className = 'post-ad';
+                        adContainer.innerHTML = `
+                            <div class="time-badge">SPONSORED</div>
+                            <ins class="adsbygoogle"
+                                 style="display:block"
+                                 data-ad-format="fluid"
+                                 data-ad-layout-key="-6s+ea+2i-1i-4k"
+                                 data-ad-client="ca-pub-5355424366172129"
+                                 data-ad-slot="7806829014"></ins>
+                        `;
+                        feed.appendChild(adContainer);
+                        
+                        // Trigger AdSense initialization for dynamic unit
+                        try {
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                        } catch (e) {}
+                    }
                 });
             } catch (err) {
                 feed.innerHTML = "<p style='color: #ef4444;'>ERROR CONNECTING TO DATABASE.</p>";
             }
         }
 
-        // Load immediately when page opens
+        // Initial execution
         loadPosts();
         
-        // Auto-refresh the page every 30 seconds to look for new posts
+        // Auto-refresh feed every 30 seconds
         setInterval(loadPosts, 30000);
     </script>
 </body>
