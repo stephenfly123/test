@@ -42,8 +42,8 @@
         summary:hover { background: #1e293b; }
         .blog-content { padding: 0 15px 15px 15px; font-size: 1.1rem; line-height: 1.6; color: #e2e8f0; border-top: 1px solid #1e293b; white-space: pre-wrap; margin-top: 10px; }
 
-        /* In-Feed Ad Card Styling */
-        .post-ad { background: #111827; border-left: 4px solid #64748b; padding: 15px; margin-bottom: 20px; border-radius: 4px; overflow: hidden; }
+        /* Optimized Ad Container Space */
+        .post-ad { background: #111827; border-left: 4px solid #64748b; padding: 15px; margin-bottom: 20px; border-radius: 4px; overflow: hidden; min-height: 120px; }
 
         /* Footer & Privacy Link */
         footer { border-top: 1px dashed #1e293b; margin-top: 40px; padding-top: 15px; text-align: center; font-size: 0.8rem; color: #64748b; }
@@ -103,7 +103,7 @@
     </div>
 
     <script>
-        // Manage Cookie Banner Display
+        // Cookie Consent Banner Controls
         if (!localStorage.getItem('cookieConsent')) {
             document.getElementById('cookie-banner').style.display = 'flex';
         }
@@ -121,45 +121,45 @@
             document.getElementById('privacy-modal').style.display = 'none';
         }
 
-        // SheetDB API integration
-        const API_URL = 'https://sheetdb.io/api/v1/cauz9ltpdtgy6';
+        // Unlimited Google Apps Script Web App URL
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyJeAElBAEim_yqlPQzRiOQdbna44Vpoyo_vWPTf_TlYAcQ-6clRWiyDLJqeOzFrWjh/exec';
 
         async function loadPosts() {
             const feed = document.getElementById('feed');
             
             try {
                 const response = await fetch(API_URL);
+                if (!response.ok) throw new Error("Database network error");
+                
                 let posts = await response.json();
                 
-                if (posts.length === 0) {
+                if (!Array.isArray(posts) || posts.length === 0) {
                     feed.innerHTML = "<p style='color: #64748b;'>NO ACTIVE TRANSMISSIONS...</p>";
                     return;
                 }
 
                 feed.innerHTML = ''; 
-                posts.reverse(); // Put newest entries at the top
+                posts.reverse(); // Put newest entries at top
                 
                 posts.forEach((post, index) => {
-                    // Render Note Post
                     if (post.type === 'note') {
                         const noteDiv = document.createElement('div');
                         noteDiv.className = 'post-note';
                         noteDiv.innerHTML = `
-                            <div class="time-badge">${post.time}</div>
-                            <div class="note-content">${post.text}</div>
+                            <div class="time-badge">${post.time || ''}</div>
+                            <div class="note-content">${post.text || ''}</div>
                         `;
                         feed.appendChild(noteDiv);
                     } 
-                    // Render Blog Post
                     else if (post.type === 'blog') {
                         const blogDetails = document.createElement('details');
                         blogDetails.className = 'post-blog';
                         blogDetails.innerHTML = `
                             <summary>
-                                <div class="time-badge">${post.time}</div>
-                                [+] ${post.title}
+                                <div class="time-badge">${post.time || ''}</div>
+                                [+] ${post.title || 'Untitled'}
                             </summary>
-                            <div class="blog-content">${post.text}</div>
+                            <div class="blog-content">${post.text || ''}</div>
                         `;
                         feed.appendChild(blogDetails);
                     }
@@ -179,22 +179,23 @@
                         `;
                         feed.appendChild(adContainer);
                         
-                        // Trigger AdSense initialization for dynamic unit
                         try {
-                            (adsbygoogle = window.adsbygoogle || []).push({});
-                        } catch (e) {}
+                            (window.adsbygoogle = window.adsbygoogle || []).push({});
+                        } catch (e) {
+                            console.log("AdSense pending or blocked:", e);
+                        }
                     }
                 });
             } catch (err) {
-                feed.innerHTML = "<p style='color: #ef4444;'>ERROR CONNECTING TO DATABASE.</p>";
+                feed.innerHTML = "<p style='color: #ef4444;'>ERROR CONNECTING TO CLOUD DATABASE.</p>";
             }
         }
 
         // Initial execution
         loadPosts();
         
-        // Auto-refresh feed every 30 seconds
-        setInterval(loadPosts, 30000);
+        // Refresh every 5 minutes (300,000ms)
+        setInterval(loadPosts, 300000);
     </script>
 </body>
 </html>
