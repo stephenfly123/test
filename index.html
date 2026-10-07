@@ -11,7 +11,6 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-2XW6XWZHWK');
     </script>
     <!-- End Google tag -->
@@ -28,22 +27,23 @@
         h1 { color: #22c55e; margin: 0; font-size: 1.5rem; line-height: 1.2; }
         
         .contact-group { display: flex; flex-direction: column; align-items: flex-end; text-align: right; max-width: 220px; }
-        .contact-btn { background: transparent; border: 1px solid #38bdf8; color: #38bdf8; padding: 8px 15px; text-decoration: none; font-weight: bold; border-radius: 4px; font-size: 0.85rem; cursor: pointer; width: 100%; text-align: center; }
+        .contact-btn { background: transparent; border: 1px solid #38bdf8; color: #38bdf8; padding: 8px 15px; text-decoration: none; font-weight: bold; border-radius: 4px; font-size: 0.85rem; cursor: pointer; width: 100%; text-align: center; transition: background 0.3s ease; }
         .contact-btn:hover { background: rgba(56, 189, 248, 0.15); }
         .contact-subtext { color: #94a3b8; font-size: 0.75rem; margin-top: 6px; }
         
         .time-badge { color: #94a3b8; font-size: 0.8rem; margin-bottom: 8px; font-weight: bold; }
-        .post-note { background: #111827; border-left: 4px solid #38bdf8; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+        .post-note { background: #111827; border-left: 4px solid #38bdf8; padding: 15px; margin-bottom: 20px; border-radius: 4px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .note-content { font-size: 1.1rem; line-height: 1.5; white-space: pre-wrap; }
         
-        .post-blog { background: #111827; border-left: 4px solid #facc15; margin-bottom: 20px; border-radius: 4px; }
+        .post-blog { background: #111827; border-left: 4px solid #facc15; margin-bottom: 20px; border-radius: 4px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         summary { padding: 15px; cursor: pointer; font-size: 1.2rem; font-weight: bold; color: #facc15; list-style: none; outline: none; }
         summary::-webkit-details-marker { display: none; }
         summary:hover { background: #1e293b; }
         .blog-content { padding: 0 15px 15px 15px; font-size: 1.1rem; line-height: 1.6; color: #e2e8f0; border-top: 1px solid #1e293b; white-space: pre-wrap; margin-top: 10px; }
 
-        /* Optimized Ad Container Space */
-        .post-ad { background: #111827; border-left: 4px solid #64748b; padding: 15px; margin-bottom: 20px; border-radius: 4px; overflow: hidden; min-height: 120px; }
+        /* Optimized In-Feed Ad Card */
+        .post-ad { background: #0b1120; border: 1px solid #1e293b; border-left: 4px solid #64748b; padding: 15px; margin-bottom: 20px; border-radius: 4px; min-height: 120px; text-align: center; animation: fadeIn 1s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* Footer & Privacy Link */
         footer { border-top: 1px dashed #1e293b; margin-top: 40px; padding-top: 15px; text-align: center; font-size: 0.8rem; color: #64748b; }
@@ -103,7 +103,7 @@
     </div>
 
     <script>
-        // Cookie Consent Banner Controls
+        // Manage Cookie Banner Display
         if (!localStorage.getItem('cookieConsent')) {
             document.getElementById('cookie-banner').style.display = 'flex';
         }
@@ -121,7 +121,7 @@
             document.getElementById('privacy-modal').style.display = 'none';
         }
 
-        // Unlimited Google Apps Script Web App URL
+        // --- NEW UNLIMITED GOOGLE APPS SCRIPT API ---
         const API_URL = 'https://script.google.com/macros/s/AKfycbyJeAElBAEim_yqlPQzRiOQdbna44Vpoyo_vWPTf_TlYAcQ-6clRWiyDLJqeOzFrWjh/exec';
 
         async function loadPosts() {
@@ -129,7 +129,7 @@
             
             try {
                 const response = await fetch(API_URL);
-                if (!response.ok) throw new Error("Database network error");
+                if (!response.ok) throw new Error("Network response was not ok");
                 
                 let posts = await response.json();
                 
@@ -139,9 +139,10 @@
                 }
 
                 feed.innerHTML = ''; 
-                posts.reverse(); // Put newest entries at top
+                posts.reverse(); // Put newest entries at the top
                 
                 posts.forEach((post, index) => {
+                    // Render Note Post
                     if (post.type === 'note') {
                         const noteDiv = document.createElement('div');
                         noteDiv.className = 'post-note';
@@ -151,6 +152,7 @@
                         `;
                         feed.appendChild(noteDiv);
                     } 
+                    // Render Blog Post
                     else if (post.type === 'blog') {
                         const blogDetails = document.createElement('details');
                         blogDetails.className = 'post-blog';
@@ -164,37 +166,40 @@
                         feed.appendChild(blogDetails);
                     }
 
-                    // Insert AdSense unit after every 3 posts
+                    // Optimized AdSense unit inserted after every 3 posts
                     if ((index + 1) % 3 === 0) {
                         const adContainer = document.createElement('div');
                         adContainer.className = 'post-ad';
                         adContainer.innerHTML = `
-                            <div class="time-badge">SPONSORED</div>
+                            <div class="time-badge" style="text-align: left; margin-bottom: 5px;">SPONSORED</div>
                             <ins class="adsbygoogle"
-                                 style="display:block"
+                                 style="display:block; text-align:center;"
+                                 data-ad-layout="in-article"
                                  data-ad-format="fluid"
-                                 data-ad-layout-key="-6s+ea+2i-1i-4k"
                                  data-ad-client="ca-pub-5355424366172129"
-                                 data-ad-slot="7806829014"></ins>
+                                 data-ad-slot="7806829014"
+                                 data-full-width-responsive="true"></ins>
                         `;
                         feed.appendChild(adContainer);
                         
+                        // Safely trigger AdSense initialization for dynamic unit
                         try {
                             (window.adsbygoogle = window.adsbygoogle || []).push({});
                         } catch (e) {
-                            console.log("AdSense pending or blocked:", e);
+                            console.log("AdSense pending or blocked.");
                         }
                     }
                 });
             } catch (err) {
-                feed.innerHTML = "<p style='color: #ef4444;'>ERROR CONNECTING TO CLOUD DATABASE.</p>";
+                console.error(err);
+                feed.innerHTML = "<p style='color: #ef4444;'>ERROR FETCHING DATA FROM CLOUD.</p>";
             }
         }
 
         // Initial execution
         loadPosts();
         
-        // Refresh every 5 minutes (300,000ms)
+        // Refresh every 5 minutes (300,000ms) - Safe with Apps Script!
         setInterval(loadPosts, 300000);
     </script>
 </body>
