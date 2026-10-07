@@ -35,8 +35,8 @@
     </div>
 
     <script>
-        // Your specific Google Sheets API link
-        const API_URL = 'https://sheetdb.io/api/v1/cauz9ltpdtgy6'; 
+        // Your Google Apps Script Web App URL
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyJeAElBAEim_yqlPQzRiOQdbna44Vpoyo_vWPTf_TlYAcQ-6clRWiyDLJqeOzFrWjh/exec'; 
 
         function toggleMode() {
             const type = document.getElementById('post-type').value;
@@ -65,11 +65,10 @@
                 time: timeString
             };
 
-            // Send to Google Sheets via SheetDB
             try {
                 await fetch(API_URL, {
                     method: 'POST',
-                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ data: [newPost] })
                 });
 
@@ -90,8 +89,11 @@
             status.innerText = "DELETING FROM CLOUD...";
             
             try {
-                // Delete from Google Sheets based on the ID column
-                await fetch(`${API_URL}/id/${id}`, { method: 'DELETE' });
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'delete', id: id })
+                });
                 status.innerText = "DELETED SUCCESSFULLY.";
                 renderAdminFeed();
             } catch (err) {
@@ -107,13 +109,13 @@
             try {
                 const response = await fetch(API_URL);
                 let posts = await response.json();
-                posts.reverse(); // Show newest at the top
+                posts.reverse(); // Show newest at top
                 
                 feed.innerHTML = '';
                 posts.forEach(post => {
                     const div = document.createElement('div');
                     div.className = 'admin-post';
-                    const displayName = post.type === 'blog' ? `BLOG: ${post.title}` : `NOTE: ${post.text.substring(0, 15)}...`;
+                    const displayName = post.type === 'blog' ? `BLOG: ${post.title}` : `NOTE: ${(post.text || '').substring(0, 15)}...`;
                     
                     div.innerHTML = `
                         <span style="color: #94a3b8; font-size: 0.9rem;">${displayName}</span>
